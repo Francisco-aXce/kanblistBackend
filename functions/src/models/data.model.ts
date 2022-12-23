@@ -3,3 +3,9 @@ export interface gralWriteData {
   message?: string,
   path?: string,
 }
+
+export interface gralReadData {
+  id: string,
+  exists: boolean,
+  success?: boolean,
+}
