@@ -3,9 +3,12 @@ import { logger } from "./../tools/firebase";
 import { Project } from "../models/project.model";
 import { authVerification } from "../tools/middlewares/auth-validation";
 import { createProject } from "./projects.service";
+import * as cors from "cors";
 
 export const app = express();
-app.use(authVerification());
+app.use(cors({
+  origin: true,
+}), authVerification());
 
 app.post("/api/v1/create", async (req, res) => {
   try {

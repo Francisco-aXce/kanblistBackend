@@ -1,6 +1,6 @@
-import { admin, functions, db } from "./tools/firebase";
+import { admin, functions, db, logger } from "./tools/firebase";
 
-// admin.initializeApp();
+logger.info(`Starting API, app: ${admin.app().name}`);
 db.settings({ ignoreUndefinedProperties: true });
 
 export const apiprojects = functions.https.onRequest(async (req, res) => {
