@@ -1,5 +1,5 @@
 import { Request, Response, NextFunction } from "express";
-import { admin, logger } from "../firebase";
+import { admin } from "../firebase";
 
 // Function to send error response
 const middlewareFailed = (res: Response, next: NextFunction, status = 400, err?: string | { code: string }) => {
@@ -15,7 +15,6 @@ export const authVerification = () => {
     const authHeader = req.headers?.authorization;
     const type = authHeader?.split(" ")?.[0];
     const token = authHeader?.split(" ")?.[1];
-    logger.log("authVerification", { authHeader, type, token });
     if (!authHeader || !token || !(type === "Bearer")) return middlewareFailed(res, next, 401, "No auth token provided/invalid");
 
     try {
