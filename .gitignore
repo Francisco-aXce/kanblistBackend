@@ -67,3 +67,6 @@ node_modules/
 
 # ignore lib forlder 
 lib/
+
+# Firebase backup
+.firebase-emulators

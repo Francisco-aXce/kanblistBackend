@@ -1,4 +1,8 @@
 {
+  "scripts": {
+    "serve:firebase:all": "firebase emulators:start --export-on-exit .firebase-emulators --import .firebase-emulators",
+    "compile-functions": "cd functions && npm run build:watch"
+  },
   "dependencies": {
     "firebase-admin": "^11.4.0",
     "firebase-functions": "^4.1.1"
