@@ -1,5 +1,6 @@
 export interface Project {
   name: string,
+  image: string,
   active: boolean,
 }
 

@@ -19,6 +19,7 @@ app.post("/api/v1/create", async (req, res) => {
     // Filter data
     const finalData: Project = {
       name: rawProjData?.name,
+      image: rawProjData?.image,
       active: rawProjData?.active ?? true,
     };
     const owner = res.locals.user.uid;
