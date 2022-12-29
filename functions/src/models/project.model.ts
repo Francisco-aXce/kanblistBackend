@@ -1,8 +1,13 @@
-export interface Project {
+import { gralReadData } from "./data.model";
+
+export interface ProjectCreation {
   name: string,
   image: string,
-  active: boolean,
+  description: string,
+  active?: boolean,
 }
+
+export interface Project extends ProjectCreation, gralReadData { }
 
 export interface Goal {
   name: string,

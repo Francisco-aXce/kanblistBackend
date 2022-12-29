@@ -3,15 +3,22 @@ import { gralReadData, gralWriteData } from "../models/data.model";
 
 // #region Collections
 
-export const addDocCol = (collection: string | FirebaseFirestore.CollectionReference, data: unknown): Promise<gralWriteData> => {
+export const addDocCol = (collection: string | FirebaseFirestore.CollectionReference, data: unknown, idOther?: string): Promise<gralWriteData> => {
   const colRef = typeof collection === "string" ? db.collection(collection) : collection;
-  return colRef.add({
+  const docRef = idOther ? colRef.doc(idOther) : colRef.doc();
+
+  // FIXME: Add doc col should be a new doc, so in case that other id is provided, it should be checked if it exists
+
+  return docRef.set({
     createdAt: serverTimestamp(),
     ...(data || {}),
-  }).then((docRef) => ({
-    path: docRef.path, success: true,
+  }).then(() => ({
+    id: docRef.id,
+    path: docRef.path,
+    success: true,
   })).catch((error: Error) => ({
-    message: error.message, success: false,
+    message: error.message,
+    success: false,
   }));
 };
 
@@ -48,11 +55,13 @@ export const getDoc = (doc: string | FirebaseFirestore.DocumentReference): Promi
   return docRef.get().then((docSnap) => ({
     id: docSnap.id,
     exists: docSnap.exists,
+    path: docSnap.ref.path,
     ...(docSnap.data() || {}),
   })).catch((error: Error) => ({
     id: "",
     exists: false,
     message: error.message,
+    path: docRef.path,
     success: false,
   }));
 };
