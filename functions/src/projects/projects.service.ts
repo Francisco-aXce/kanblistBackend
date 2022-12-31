@@ -16,7 +16,7 @@ export const createProject = async (owner: string, data: ProjectCreation) => {
   const projectFolder = `users/${owner}/projects/${projectId}`;
 
   return await Promise.all([
-    addDocCol(`users/${owner}/projects`, dbData),
+    addDocCol(`users/${owner}/projects`, dbData, projectId),
     uploadByString(description, `${projectFolder}/description.json`, "application/json"),
   ]).then((resp) => resp[0]).catch((error) => (error));
 };
