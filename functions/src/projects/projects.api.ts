@@ -26,6 +26,7 @@ app.post("/api/v1/create", async (req, res) => {
     const owner = {
       id: res.locals.user.uid,
       name: res.locals.user.name,
+      email: res.locals.user.email,
     };
     const creationResp = await createProject(owner, finalData);
     if (!creationResp.success) {

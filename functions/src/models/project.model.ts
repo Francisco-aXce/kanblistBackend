@@ -17,6 +17,7 @@ export interface Goal {
 export interface ProjectOwner {
   id: string,
   name: string,
+  email: string,
 }
 
 export interface ProjectMember extends ProjectOwner {
