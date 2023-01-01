@@ -1,22 +1,23 @@
-import { Goal, ProjectCreation } from "../models/project.model";
+import { Goal, ProjectCreation, ProjectOwner } from "../models/project.model";
 import { uploadByString } from "../services/storage.service";
 import { db, serverTimestamp } from "../tools/firebase";
 import { addDocCol, updateDoc } from "./../services/db.service";
 
-export const createProject = async (owner: string, data: ProjectCreation) => {
+export const createProject = async (owner: ProjectOwner, data: ProjectCreation) => {
   const dbData = {
     name: data.name,
     image: data.image,
     active: data.active,
+    owner,
   };
   const description = data.description;
-  const projectDocRef = db.collection(`users/${owner}/projects`).doc();
+  const projectDocRef = db.collection(`users/${owner.id}/projects`).doc();
   const projectId = projectDocRef.id;
 
-  const projectFolder = `users/${owner}/projects/${projectId}`;
+  const projectFolder = `users/${owner.id}/projects/${projectId}`;
 
   return await Promise.all([
-    addDocCol(`users/${owner}/projects`, dbData, projectId),
+    addDocCol(`users/${owner.id}/projects`, dbData, projectId),
     uploadByString(description, `${projectFolder}/description.json`, "application/json"),
   ]).then((resp) => resp[0]).catch((error) => (error));
 };

@@ -13,3 +13,12 @@ export interface Goal {
   name: string,
   active: boolean,
 }
+
+export interface ProjectOwner {
+  id: string,
+  name: string,
+}
+
+export interface ProjectMember extends ProjectOwner {
+  role: string,
+}

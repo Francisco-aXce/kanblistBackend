@@ -1,6 +1,6 @@
 import * as express from "express";
 import { logger } from "./../tools/firebase";
-import { Goal, ProjectCreation } from "../models/project.model";
+import { Goal, ProjectCreation, ProjectOwner } from "../models/project.model";
 import { authVerification } from "../tools/middlewares/auth-validation";
 import { createBoard, createGoal, createProject, deactivateBoard, deactivateGoal, deactivateProject } from "./projects.service";
 import * as cors from "cors";
@@ -23,7 +23,10 @@ app.post("/api/v1/create", async (req, res) => {
       description: rawProjData?.description,
       active: rawProjData?.active ?? true,
     };
-    const owner = res.locals.user.uid;
+    const owner = {
+      id: res.locals.user.uid,
+      name: res.locals.user.name,
+    };
     const creationResp = await createProject(owner, finalData);
     if (!creationResp.success) {
       logger.error(creationResp.message);
