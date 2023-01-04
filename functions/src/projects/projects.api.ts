@@ -1,10 +1,11 @@
 import * as express from "express";
 import { logger } from "./../tools/firebase";
-import { Goal, ProjectCreation, ProjectOwner } from "../models/project.model";
+import { GoalCreation, ProjectCreation } from "../models/project.model";
 import { authVerification } from "../tools/middlewares/auth-validation";
-import { createBoard, createGoal, createProject, deactivateBoard, deactivateGoal, deactivateProject } from "./projects.service";
+import { createGoal, createProject, deactivateProject, editProject } from "./projects.service";
 import * as cors from "cors";
-import { getDoc } from "../services/db.service";
+import { arrayUnion, getDoc } from "../services/db.service";
+import { userBelogsTo } from "../services/general.service";
 
 export const app = express();
 app.use(cors({
@@ -40,6 +41,32 @@ app.post("/api/v1/create", async (req, res) => {
   }
 });
 
+app.put("/api/v1/edit", async (req, res) => {
+  try {
+    const body = req.body;
+    const rawProjData = body?.projectData;
+    const projId = body?.projectId;
+    const owner = body?.owner;
+    const user = res.locals.user;
+
+    // Filter data
+    const finalData: ProjectCreation = {
+      name: rawProjData?.name,
+      image: rawProjData?.image,
+      description: rawProjData?.description,
+    };
+    const response = await editProject(owner, projId, finalData, user.uid);
+    if (!response.success) {
+      logger.error(response.message);
+      return res.status(500).send({ success: false, message: response.message }).end();
+    }
+    return res.status(200).send({ success: true, data: finalData }).end();
+  } catch (error) {
+    logger.error(error);
+    return res.status(500).send({ success: false }).end();
+  }
+});
+
 /*
   TODO: Passed certain time (days based in deactivation date) delete the project
   This involves:
@@ -67,28 +94,27 @@ app.post("/api/v1/createGoal", async (req, res) => {
   try {
     const body = req.body;
     const rawGoalData = body?.goalData;
-    const projectId = body?.projectId;
-    const owner = res.locals.user.uid;
+    const projectInfo = body?.projectInfo;
+    const user = res.locals.user;
 
-    /*
-     TODO: Maybe better to do an update (adding updatedAt) instead of a get and do the creation depending on the update
-     In case of ok create, if not, return error
-     This involves:
-      - goals
-      - boards
-      - tasks
-    */
-    const projectData = await getDoc(`users/${owner}/projects/${projectId}`);
+    const projectData = await getDoc(`users/${projectInfo.owner.id}/projects/${projectInfo.id}`);
     if (!projectData.exists || projectData?.success === false) {
       return res.status(500).send({ success: false, message: "Problem detected with the project" }).end();
+    } else if (projectData?.owner?.id !== user.uid && !userBelogsTo(user, projectData?.shared)) {
+      return res.status(500).send({ success: false, message: "No access to this project" }).end();
     }
 
     // Filter data
-    const finalData: Goal = {
+    const finalData: GoalCreation = {
       name: rawGoalData?.name,
+      description: rawGoalData?.description,
+      order: rawGoalData?.order ?? 0,
+      color: rawGoalData?.color,
+      attendant: { id: user.uid },
+      assigned: rawGoalData?.assigned ? arrayUnion(rawGoalData?.assigned) : undefined,
       active: rawGoalData?.active ?? true,
     };
-    const creationResp = await createGoal(owner, projectId, finalData);
+    const creationResp = await createGoal(projectInfo.owner.id, projectInfo.id, finalData);
     if (!creationResp.success) {
       logger.error(creationResp.message);
       return res.status(500).send({ success: false, message: creationResp.message }).end();
@@ -100,6 +126,7 @@ app.post("/api/v1/createGoal", async (req, res) => {
   }
 });
 
+/*
 app.delete("/api/v1/deleteGoal", async (req, res) => {
   try {
     const projectId = req.body?.projectId;
@@ -164,3 +191,4 @@ app.delete("/api/v1/deleteBoard", async (req, res) => {
     return res.status(500).send({ success: false }).end();
   }
 });
+*/

@@ -1,5 +1,6 @@
-import { serverTimestamp, db } from "./../tools/firebase";
-import { gralReadData, gralWriteData } from "../models/data.model";
+/* eslint-disable @typescript-eslint/no-explicit-any */
+import { serverTimestamp, db, admin } from "./../tools/firebase";
+import { gralWriteData } from "../models/data.model";
 
 // #region Collections
 
@@ -50,7 +51,7 @@ export const updateDoc = (doc: string | FirebaseFirestore.DocumentReference, dat
   }));
 };
 
-export const getDoc = (doc: string | FirebaseFirestore.DocumentReference): Promise<gralReadData> => {
+export const getDoc = (doc: string | FirebaseFirestore.DocumentReference): Promise<any> => {
   const docRef = typeof doc === "string" ? db.doc(doc) : doc;
   return docRef.get().then((docSnap) => ({
     id: docSnap.id,
@@ -74,5 +75,11 @@ export const getDoc = (doc: string | FirebaseFirestore.DocumentReference): Promi
 //     message: error.message, success: false,
 //   }));
 // };
+
+export const arrayUnion = (value: any) => {
+  return Array.isArray(value) ?
+    admin.firestore.FieldValue.arrayUnion(...value) :
+    admin.firestore.FieldValue.arrayUnion(value);
+};
 
 // #endregion

@@ -1,3 +1,4 @@
+import { firestore } from "firebase-admin";
 import { gralReadData } from "./data.model";
 
 export interface ProjectCreation {
@@ -9,10 +10,23 @@ export interface ProjectCreation {
 
 export interface Project extends ProjectCreation, gralReadData { }
 
-export interface Goal {
+export interface GoalCreation {
   name: string,
+  description: string,
+  order: number,
+  color?: string,
+  attendant: {
+    id: string,
+  },
+  assigned?: [
+    {
+      id: string,
+    }
+  ] | firestore.FieldValue,
   active: boolean,
 }
+
+export interface Goal extends GoalCreation, gralReadData { }
 
 export interface ProjectOwner {
   id: string,
