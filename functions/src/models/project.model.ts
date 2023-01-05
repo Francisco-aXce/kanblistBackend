@@ -13,7 +13,7 @@ export interface Project extends ProjectCreation, gralReadData { }
 export interface GoalCreation {
   name: string,
   description: string,
-  order: number,
+  // order: number,
   color?: string,
   attendant: {
     id: string,

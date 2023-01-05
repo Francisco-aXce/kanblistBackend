@@ -108,7 +108,7 @@ app.post("/api/v1/createGoal", async (req, res) => {
     const finalData: GoalCreation = {
       name: rawGoalData?.name,
       description: rawGoalData?.description,
-      order: rawGoalData?.order ?? 0,
+      // order: rawGoalData?.order ?? 0,
       color: rawGoalData?.color,
       attendant: { id: user.uid },
       assigned: rawGoalData?.assigned ? arrayUnion(rawGoalData?.assigned) : undefined,
