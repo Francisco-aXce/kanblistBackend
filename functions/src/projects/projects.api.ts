@@ -2,7 +2,7 @@ import * as express from "express";
 import { logger } from "./../tools/firebase";
 import { GoalCreation, ProjectCreation } from "../models/project.model";
 import { authVerification } from "../tools/middlewares/auth-validation";
-import { createGoal, createProject, deactivateProject, editProject } from "./projects.service";
+import { createBoard, createGoal, createProject, deactivateProject, editProject } from "./projects.service";
 import * as cors from "cors";
 import { arrayUnion, getDoc } from "../services/db.service";
 import { userBelogsTo } from "../services/general.service";
@@ -126,6 +126,38 @@ app.post("/api/v1/createGoal", async (req, res) => {
   }
 });
 
+app.post("/api/v1/createBoard", async (req, res) => {
+  try {
+    const body = req.body;
+    const rawBoardData = body?.boardData;
+    const goalId = body?.goalId;
+    const projectInfo = body?.projectInfo;
+    const user = res.locals.user;
+
+    const goalData = await getDoc(`users/${projectInfo.owner.id}/projects/${projectInfo.id}/goals/${goalId}`);
+    if (!goalData.exists || goalData?.success === false) {
+      return res.status(500).send({ success: false, message: "Problem detected with the goal" }).end();
+    }
+
+    // Filter data
+    // TODO: Add type
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const finalData: any = {
+      name: rawBoardData?.name,
+      active: rawBoardData?.active ?? true,
+    };
+    const creationResp = await createBoard(projectInfo.owner.id, projectInfo.id, goalId, finalData, user.uid);
+    if (!creationResp.success) {
+      logger.error(creationResp.message);
+      return res.status(500).send({ success: false, message: creationResp.message }).end();
+    }
+    return res.status(200).send({ success: true, data: finalData }).end();
+  } catch (error) {
+    logger.error(error);
+    return res.status(500).send({ success: false }).end();
+  }
+});
+
 /*
 app.delete("/api/v1/deleteGoal", async (req, res) => {
   try {
@@ -138,36 +170,6 @@ app.delete("/api/v1/deleteGoal", async (req, res) => {
       return res.status(500).send({ success: false, message: deactivateResp.message }).end();
     }
     return res.status(200).send({ success: true }).end();
-  } catch (error) {
-    logger.error(error);
-    return res.status(500).send({ success: false }).end();
-  }
-});
-
-app.post("/api/v1/createBoard", async (req, res) => {
-  try {
-    const body = req.body;
-    const rawBoardData = body?.boardData;
-    const goalId = body?.goalId;
-    const projectId = body?.projectId;
-    const owner = res.locals.user.uid;
-
-    const goalData = await getDoc(`users/${owner}/projects/${projectId}/goals/${goalId}`);
-    if (!goalData.exists || goalData?.success === false) {
-      return res.status(500).send({ success: false, message: "Problem detected with the goal" }).end();
-    }
-
-    // Filter data
-    const finalData: Goal = {
-      name: rawBoardData?.name,
-      active: rawBoardData?.active ?? true,
-    };
-    const creationResp = await createBoard(owner, projectId, goalId, finalData);
-    if (!creationResp.success) {
-      logger.error(creationResp.message);
-      return res.status(500).send({ success: false, message: creationResp.message }).end();
-    }
-    return res.status(200).send({ success: true, data: finalData }).end();
   } catch (error) {
     logger.error(error);
     return res.status(500).send({ success: false }).end();
