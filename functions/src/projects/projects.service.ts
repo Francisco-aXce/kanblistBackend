@@ -63,6 +63,20 @@ export const createBoard = (owner: string, projId: string, goalId: string, data:
   ]).then((resp) => resp[0]).catch((error) => ({ success: false, message: error.message ?? error }));
 };
 
+// TODO: Add type for data
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+export const createTask = (owner: string, projId: string, goalId: string, boardId: string, data: any, userId: string) => {
+  const dbData = {
+    tasks: arrayUnion({ ...data }),
+    updatedAt: serverTimestamp(),
+    updatedBy: userId,
+  };
+
+  return Promise.all([
+    updateDoc(`users/${owner}/projects/${projId}/goals/${goalId}/boards/${boardId}`, dbData),
+  ]).then((resp) => resp[0]).catch((error) => ({ success: false, message: error.message ?? error }));
+};
+
 export const deactivateProject = (owner: string, projId: string) => {
   const deactivationData = {
     active: false,
