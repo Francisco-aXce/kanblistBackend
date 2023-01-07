@@ -6,3 +6,7 @@ db.settings({ ignoreUndefinedProperties: true });
 export const apiprojects = functions.https.onRequest(async (req, res) => {
   await (await import("./projects/projects.api")).app(req, res);
 });
+
+export const apiusers = functions.https.onRequest(async (req, res) => {
+  await (await import("./users/users.api")).app(req, res);
+});
