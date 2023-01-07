@@ -2,7 +2,7 @@ import * as express from "express";
 import { logger } from "./../tools/firebase";
 import { GoalCreation, ProjectCreation } from "../models/project.model";
 import { authVerification } from "../tools/middlewares/auth-validation";
-import { createBoard, createGoal, createProject, deactivateProject, editProject, createTask, editTask } from "./projects.service";
+import { createBoard, createGoal, createProject, deactivateProject, editProject, createTask, editTask, editBoard } from "./projects.service";
 import * as cors from "cors";
 import { arrayUnion, getDoc } from "../services/db.service";
 import { userBelogsTo } from "../services/general.service";
@@ -151,6 +151,39 @@ app.post("/api/v1/createBoard", async (req, res) => {
     if (!creationResp.success) {
       logger.error(creationResp.message);
       return res.status(500).send({ success: false, message: creationResp.message }).end();
+    }
+    return res.status(200).send({ success: true, data: finalData }).end();
+  } catch (error) {
+    logger.error(error);
+    return res.status(500).send({ success: false }).end();
+  }
+});
+
+app.post("/api/v1/editBoard", async (req, res) => {
+  try {
+    const body = req.body;
+    const rawBoardData = body?.boardData;
+    const goalId = body?.goalId;
+    const boardId = body?.boardId;
+    const projectInfo = body?.projectInfo;
+    const user = res.locals.user;
+
+    // FIXME: There should be project shared system comprobation instead
+    const goalData = await getDoc(`users/${projectInfo.owner.id}/projects/${projectInfo.id}/goals/${goalId}`);
+    if (!goalData.exists || goalData?.success === false) {
+      return res.status(500).send({ success: false, message: "Problem detected with the goal" }).end();
+    }
+
+    // Filter data
+    // TODO: Add type
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const finalData: any = {
+      name: rawBoardData?.name,
+    };
+    const response = await editBoard(projectInfo.owner.id, projectInfo.id, goalId, boardId, finalData, user.uid);
+    if (!response.success) {
+      logger.error(response.message);
+      return res.status(500).send({ success: false, message: response.message }).end();
     }
     return res.status(200).send({ success: true, data: finalData }).end();
   } catch (error) {
