@@ -21,6 +21,7 @@ app.get("/api/v1/info/:uid", async (req, res) => {
     id: user.uid,
     email: user.email,
     name: user.displayName,
+    photo: user.photoURL,
   };
   return res.status(200).send(finalData);
 });
