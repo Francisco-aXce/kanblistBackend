@@ -4,11 +4,16 @@ import { gralWriteData } from "../models/data.model";
 
 // #region Collections
 
-export const addDocCol = (collection: string | FirebaseFirestore.CollectionReference, data: unknown, idOther?: string): Promise<gralWriteData> => {
+export const addDocCol = async (collection: string | FirebaseFirestore.CollectionReference, data: unknown, idOther?: string): Promise<gralWriteData> => {
   const colRef = typeof collection === "string" ? db.collection(collection) : collection;
   const docRef = idOther ? colRef.doc(idOther) : colRef.doc();
 
-  // FIXME: Add doc col should be a new doc, so in case that other id is provided, it should be checked if it exists
+  if (idOther) {
+    const exists = await docRef.get().then((doc) => doc.exists);
+    if (exists) {
+      return { success: false, message: "Document already exists" };
+    }
+  }
 
   return docRef.set({
     createdAt: serverTimestamp(),

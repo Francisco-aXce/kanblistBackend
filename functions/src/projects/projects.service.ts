@@ -1,9 +1,9 @@
-import { GoalCreation, ProjectCreation, ProjectOwner } from "../models/project.model";
+import { GoalCreation, ProjectCreation, User } from "../models/project.model";
 import { uploadByString } from "../services/storage.service";
 import { db, serverTimestamp } from "../tools/firebase";
 import { addDocCol, arrayUnion, getDoc, updateDoc } from "./../services/db.service";
 
-export const createProject = async (owner: ProjectOwner, data: ProjectCreation) => {
+export const createProject = async (owner: User, data: ProjectCreation) => {
   const { description, ...dbData } = data;
   const projectDocRef = db.collection(`users/${owner.id}/projects`).doc();
   const projectId = projectDocRef.id;

@@ -28,12 +28,10 @@ export interface GoalCreation {
 
 export interface Goal extends GoalCreation, gralReadData { }
 
-export interface ProjectOwner {
+export interface User {
   id: string,
-  name: string,
-  email: string,
 }
 
-export interface ProjectMember extends ProjectOwner {
+export interface ProjectMember extends User {
   role: string,
 }
