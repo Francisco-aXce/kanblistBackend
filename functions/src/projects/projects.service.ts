@@ -16,7 +16,7 @@ export const createProject = async (userInfo: { claims: UserClaims, ownerData: U
   const projectFolder = `users/${userInfo.ownerData.id}/projects/${projectId}`;
 
   return await Promise.all([
-    addDocCol(`users/${userInfo.ownerData.id}/projects`, { ...dbData, owner: userInfo.ownerData }, projectId),
+    addDocCol(`users/${userInfo.ownerData.id}/projects`, { ...dbData, owner: userInfo.ownerData, maxGoals: 4 }, projectId),
     setDoc(userDocRef, { projectCount: increment(1), updatedAt: serverTimestamp() }, true),
     uploadByString(description, `${projectFolder}/description.json`, "application/json", "public, max-age=0"),
   ]).then((resp) => resp[0]).catch((error) => ({ success: false, message: error.message ?? error }));

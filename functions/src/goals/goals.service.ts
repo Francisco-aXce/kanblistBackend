@@ -3,7 +3,19 @@ import { addDocCol, arrayUnion, updateDoc } from "../services/db.service";
 import { uploadByString } from "../services/storage.service";
 import { db, serverTimestamp } from "../tools/firebase";
 
-export const createGoal = (owner: string, projId: string, data: GoalCreation) => {
+export const createGoal = async (owner: string, projId: string, data: GoalCreation) => {
+  const projDocRef = db.doc(`users/${owner}/projects/${projId}`);
+  const canCreateGoal = await projDocRef.get()
+    .then((doc) => {
+      const data = doc.data();
+      const maxGoals = data?.maxGoals ?? 0;
+      const goalsCount = data?.goals?.length ?? 0;
+      return data?.active && goalsCount < maxGoals;
+    })
+    .catch(() => false);
+
+  if (!canCreateGoal) return { success: false, message: "You have reached the maximum number of goals" };
+
   const { description, ...dbData } = data;
   const goalDocRef = db.collection(`users/${owner}/projects/${projId}/goals`).doc();
   const goalId = goalDocRef.id;
@@ -17,7 +29,7 @@ export const createGoal = (owner: string, projId: string, data: GoalCreation) =>
 
   return Promise.all([
     addDocCol(`users/${owner}/projects/${projId}/goals`, dbData, goalId),
-    updateDoc(`users/${owner}/projects/${projId}`, rootProjDataDB),
+    updateDoc(projDocRef, rootProjDataDB),
     uploadByString(description, `${goalFolder}/description.json`, "application/json"),
   ]).then((resp) => resp[0]).catch((error) => ({ success: false, message: error.message ?? error }));
 };
