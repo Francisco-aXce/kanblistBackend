@@ -40,7 +40,7 @@ app.post("/api/v1/create", async (req, res) => {
   }
 });
 
-app.put("/api/v1/edit", async (req, res) => {
+app.patch("/api/v1/edit", async (req, res) => {
   try {
     const body = req.body;
     const rawProjData = body?.projectData;
