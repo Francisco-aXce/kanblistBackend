@@ -28,7 +28,7 @@ export const createGoal = async (owner: string, projId: string, data: GoalCreati
   const goalFolder = `users/${owner}/projects/${projId}/goals/${goalId}`;
 
   return Promise.all([
-    addDocCol(`users/${owner}/projects/${projId}/goals`, dbData, goalId),
+    addDocCol(`users/${owner}/projects/${projId}/goals`, { ...dbData, maxBoards: 4 }, goalId),
     updateDoc(projDocRef, rootProjDataDB),
     uploadByString(description, `${goalFolder}/description.json`, "application/json"),
   ]).then((resp) => resp[0]).catch((error) => ({ success: false, message: error.message ?? error }));

@@ -3,10 +3,23 @@ import { db, serverTimestamp } from "../tools/firebase";
 
 // TODO: Add type for data
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
-export const createBoard = (owner: string, projId: string, goalId: string, data: any, userId: string) => {
+export const createBoard = async (owner: string, projId: string, goalId: string, data: any, userId: string) => {
+  const goalDocRef = db.doc(`users/${owner}/projects/${projId}/goals/${goalId}`);
+  const canCreate = await goalDocRef.get()
+    .then((doc) => {
+      const data = doc.data();
+      const maxBoards = data?.maxBoards ?? 0;
+      const boardsCount = data?.boards?.length ?? 0;
+
+      return data?.active && boardsCount < maxBoards;
+    })
+    .catch(() => false);
+
+  if (!canCreate) return { success: false, message: "You have reached the maximum number of boards" };
+
   const dbData = data;
-  const goalDocRef = db.collection(`users/${owner}/projects/${projId}/goals/${goalId}/boards`).doc();
-  const boardId = goalDocRef.id;
+  const boardDocRef = db.collection(`users/${owner}/projects/${projId}/goals/${goalId}/boards`).doc();
+  const boardId = boardDocRef.id;
   const rootGoalDataDB = {
     boards: arrayUnion({ id: boardId }),
     updatedAt: serverTimestamp(),
@@ -15,7 +28,7 @@ export const createBoard = (owner: string, projId: string, goalId: string, data:
 
   return Promise.all([
     addDocCol(`users/${owner}/projects/${projId}/goals/${goalId}/boards`, dbData, boardId),
-    updateDoc(`users/${owner}/projects/${projId}/goals/${goalId}`, rootGoalDataDB),
+    updateDoc(goalDocRef, rootGoalDataDB),
   ]).then((resp) => resp[0]).catch((error) => ({ success: false, message: error.message ?? error }));
 };
 
