@@ -9,7 +9,7 @@ export const addDocCol = async (collection: string | FirebaseFirestore.Collectio
   const docRef = idOther ? colRef.doc(idOther) : colRef.doc();
 
   if (idOther) {
-    const exists = await docRef.get().then((doc) => doc.exists);
+    const exists = await docRef.get().then((doc) => doc.exists).catch(() => true);
     if (exists) {
       return { success: false, message: "Document already exists" };
     }
@@ -85,6 +85,10 @@ export const arrayUnion = (value: any) => {
   return Array.isArray(value) ?
     admin.firestore.FieldValue.arrayUnion(...value) :
     admin.firestore.FieldValue.arrayUnion(value);
+};
+
+export const increment = (value: number) => {
+  return admin.firestore.FieldValue.increment(value);
 };
 
 // #endregion

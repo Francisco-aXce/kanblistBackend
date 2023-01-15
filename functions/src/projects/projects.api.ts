@@ -22,10 +22,13 @@ app.post("/api/v1/create", async (req, res) => {
       description: rawProjData?.description,
       active: rawProjData?.active ?? true,
     };
-    const owner = {
-      id: res.locals.user.uid,
+    const userInfo = {
+      claims: res.locals.user,
+      ownerData: {
+        id: res.locals.user.uid,
+      },
     };
-    const creationResp = await createProject(owner, finalData);
+    const creationResp = await createProject(userInfo, finalData);
     if (!creationResp.success) {
       logger.error(creationResp.message);
       return res.status(500).send({ success: false, message: creationResp.message }).end();

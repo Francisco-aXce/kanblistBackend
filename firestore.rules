@@ -4,8 +4,18 @@ service cloud.firestore {
     // match /{document=**} {
     //   allow read: if true;
     // }
-    match /users/{userId}/projects/{projId=**} {
-    	allow read, write: if request.auth.uid == userId;
+
+    match /users/{userId} {
+    	allow read, write: if isUser(userId);
     }
+
+    match /users/{userId}/projects/{projId=**} {
+      // FIXME: Add rules for members
+    	allow read, write: if isUser(userId);
+    }
+  }
+
+  function isUser(userId){
+    return request.auth.uid == userId;
   }
 }
